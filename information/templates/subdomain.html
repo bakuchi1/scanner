@@ -1,0 +1,29 @@
+{% extends 'template.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="table-responsive" id="refresh">
+        <table class="table table-bordered text-center" id="table" data-toggle="table">
+            <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Subdomains</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for sub in subdomains %}
+                <tr>
+                    <td>{{ sub.id }}</td>
+                    <td>{{ sub.sub_name }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends 'template.html' %}
+
+{% block content %}
+    <div class="container" style="margin-bottom: 50px">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-7">
+                    <h2>Domain scanning can help you find hidden subdomains</h2>
+                </div>
+            </div>
+            <div class="row-cols-1">
+                <input type="text" name="domain" class="form-control form-control-lg" placeholder="Input URLs">
+            </div>
+
+
+            <div style="margin-top: 20px;text-align: center">
+                <button class=" scan-btn btn btn-outline-dark">Start domain Scan</button>
+            </div>
+
+        </div>
+    </div>
+     <div class="container mt-4">
+        <div class="table-responsive" id="refresh">
+            <table class="table table-bordered text-center" id="table" data-toggle="table">
+                <thead class="table-dark">
+                <tr>
+                    <th>domain</th>
+                    <th>Operate</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for domain in domains %}
+                    <tr>
+                        <td><a href="http://127.0.0.1:8000/subdomains/?nid={{ domain.id }}">{{ domain.name }}</a></td>
+                        <td>
+                            <a href="http://127.0.0.1:8000/delete_domain/?nid={{ domain.id }}">
+                                <button class="bg-dark text-white">delete</button>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    </div>
+
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript">
+        function subdomain_scan(domain) {
+            $.post('get_subdomain/', {
+                domain: domain
+            }, function (data) {
+                if (data.code !== 200) {
+                    console.log(domain);
+                    layer.msg('Failed', {icon: 2, offset: '100px', area: ['70px', '70px']});
+                } else {
+                    console.log(domain);
+                    layer.msg('success', {icon: 1, offset: '220px', area: ['70px', '70px']});
+                    setTimeout(function () {
+                            location.reload();  // Refresh the page after scan request
+                        }, 2000);
+                }
+                console.log(domain);
+                $(".scan-btn").html('<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><circle cx="10" cy="10" r="7"></circle><line x1="21" y1="21" x2="15" y2="15"></line></svg>' + 'rescan');
+                $('.scan-btn').attr('disabled', false);
+            });
+        }
+
+        $(function () {
+            $(".scan-btn").click(function () {
+                $(this).attr('disabled', true);
+                $(this).html('please wait<span class="spinner-border spinner-border-sm me-2" role="status"></span>');
+                var domain = $('input[name=domain]').val();
+                if (domain) {
+                    console.log(domain);
+                    subdomain_scan(domain);
+                } else {
+                    $('input[name=domain]').val('');
+                    layer.msg('please input correct URL，\nfor example：http://example.com');
+                    $(".scan-btn").text('search');
+                    $(".scan-btn").html('<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><circle cx="10" cy="10" r="7"></circle><line x1="21" y1="21" x2="15" y2="15"></line></svg>\n' + 'subdomain scan');
+                    $(".scan-btn").attr('disabled', false);
+                }
+            });
+
+        });
+    </script>
+
+
+{% endblock %}

@@ -1,0 +1,91 @@
+{% load  static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap-5.3.0-dist/css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/fontawesome-free-6.4.0-web/css/fontawesome.css' %}">
+    {% block css %}{% endblock %}
+</head>
+<body>
+<div class="container">
+    <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+
+
+        <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+            <li class="nav-item active"><a href="http://127.0.0.1:8000/vulnscan/" class="nav-link px-2 link-secondary">EasyScan</a>
+            </li>
+            <li class="nav-item"><a href="http://127.0.0.1:8000/dashboard/" class="nav-link px-2" style="color: black">Dashboard</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"
+                   aria-haspopup="false" style="color: black">Information</a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="http://127.0.0.1:8000/portscan/">Port scan</a></li>
+                    <li><a class="dropdown-item" href="http://127.0.0.1:8000/domainscan/">Domain
+                        detection</a></li>
+                </ul>
+            </li>
+            <!--<li><a href="/vulnerabilities" class="nav-link px-2" style="color: black">vulnerabilities</a></li>-->
+        </ul>
+
+        <!--<ul class="nav navbar-nav navbar-right text-dark">
+            <li>
+                <a href="http://127.0.0.1:8000/login/" style="text-decoration: none">
+
+                    Login
+
+            </a>
+            </li>
+
+            <li class="dropdown ">
+                <a href="#" style="text-decoration: none">
+
+                    {{ request.session.info.name }}
+
+            </a>
+                <ul class="dropdown-menu">
+                    <li><a href="logout/">logout</a></li>
+                </ul>
+            </li>
+
+
+        </ul>-->
+
+        <div class="dropdown text-end">
+
+            <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle"
+               data-bs-toggle="dropdown" aria-expanded="false">
+                <!--<img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">-->
+                {{ request.session.info.name }}
+
+            </a>
+            <ul class="dropdown-menu text-small">
+
+                <li><a class="dropdown-item" href="http://127.0.0.1:8000/logout/">Sign out</a></li>
+            </ul>
+        </div>
+
+
+    </header>
+</div>
+
+
+{% block content %}{% endblock %}
+<section>
+    <footer class="footer p-2 bg-dark text-light text-center ">
+        <div class="container">
+            <p class="lead">Copyright &copy; by Li.</p>
+        </div>
+    </footer>
+</section>
+
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+<script src="{% static 'plugins/bootstrap-5.3.0-dist/js/bootstrap.bundle.js' %}"></script>
+<script src="{% static 'plugins/js/jquery-3.7.0.min.js' %}"></script>
+<script src="{% static 'layer/layer.js' %}"></script>
+{% block js %}{% endblock js %}
+</body>
+</html>

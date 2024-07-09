@@ -1,0 +1,186 @@
+{% extends 'template.html' %}
+
+{% block css %}
+    <style>
+
+        @keyframes typing {
+            from {
+                width: 0;
+            }
+        }
+
+        @keyframes blink-caret {
+            50% {
+                border-color: transparent;
+            }
+        }
+
+        h2 {
+            border-right: .1em solid;
+            width: 27ch;
+            white-space: nowrap;
+            overflow: hidden;
+            animation: typing 3s steps(30, end), /* step数等于字数 */ blink-caret .5s step-end infinite alternate;
+        }
+    </style>
+
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1 style="text-align: center">
+            Easy Scan.
+        </h1>
+    </div>
+
+    <div class="container">
+        <h2>
+            Help you find hidden problems.
+        </h2>
+
+
+        <div class="container row mt-2">
+            <input type="text" name="urls" class="form-control-lg w-100" placeholder="Input URLs to get a quick start.">
+        </div>
+        <div class="container mt-2 text-center">
+            <button type="submit" class="scan btn btn-lg btn-dark fw-bold border-dark bg-dark">Scan</button>
+        </div>
+
+
+    </div>
+
+    <div class="container text-center mt-2">
+        <div class="row">
+            <div class="col-sm-3">
+                <input type="radio" name="scan_type" value="full_scan" class="form-check-input"
+                       checked="">
+                <span >Full scan</span>
+            </div>
+            <div class="col-sm-3">
+                <input type="radio" name="scan_type" value="xss_vuln" class="form-check-input border-dark">
+                <span >XSS scan</span>
+            </div>
+            <div class="col-sm-3">
+                <input type="radio" name="scan_type" value="sqli_vuln" class="form-check-input border-dark">
+                <span>SQL injection scan</span>
+            </div>
+            <div class="col-sm-3">
+                <input type="radio" name="scan_type" value="weak_passwords" class="form-check-input border-dark">
+                <span>Weak passwords scan</span>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="container mt-4">
+        <div class="table-responsive" id="refresh">
+            <table class="table table-bordered text-center" id="table" data-toggle="table">
+                <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Status</th>
+                    <th>Target url</th>
+                    <th>Scan type</th>
+                    <th>Vulnerabilities</th>
+                    <th>Time</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for i in data %}
+                    <tr>
+                        <td>{{ i.id }}</td>
+                        {% if i.status == 'completed' %}
+                            <td>
+                                <span class="badge bg-success">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                         class="bi bi-check" viewBox="0 0 16 16">
+                                        <path d="M11.77 3.97a1 1 0 0 1 1.416 1.415l-5 5a1 1 0 0 1-1.416 0l-2.5-2.5a1 1 0 0 1 1.416-1.416L7 8.586l4.293-4.293a1 1 0 0 1 1.477-.083z"/>
+                                    </svg>
+                                    {{ i.status }}
+                                </span>
+                            </td>
+                        {% elif i.status == 'failed' %}
+                            <td>
+                                <span class="badge bg-danger">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                         class="bi bi-x" viewBox="0 0 16 16">
+                                        <path d="M3.354 3.354a.5.5 0 0 1 .792-.106L8 7.586l3.854-3.854a.5.5 0 0 1 .708.708L8.707 8l3.853 3.854a.5.5 0 0 1-.708.708L8 8.707l-3.854 3.853a.5.5 0 0 1-.708-.708L7.293 8 3.44 4.146a.5.5 0 0 1-.086-.792z"/>
+                                    </svg>
+                                    {{ i.status }}
+                                </span>
+                            </td>
+
+                        {% else %}
+                             <td>
+                                 <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                 {{ i.status }}
+                             </td>
+                        {% endif %}
+
+                        <td>
+                            {% if i.target_id == None %}
+                                <a href="#">{{ i.target }}</a>
+                            {% else %}
+                                <a href="vuln_result/{{ i.target_id }}">{{ i.target }}</a>
+                            {% endif %}
+                        </td>
+                        <td>{{ i.scan_type }}</td>
+                        <td>
+                            <span class="badge bg-danger ">{{ i.vuln.high }}</span>
+                            <span class="badge bg-warning">{{ i.vuln.medium }}</span>
+                            <span class="badge bg-primary">{{ i.vuln.low }}</span>
+                            <span class="badge bg-success">{{ i.vuln.info }}</span>
+                        </td>
+                        <td class="text-secondary">{{ i.plan }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+
+{% endblock %}
+{% block js %}
+    <script>
+        $(document).ready(function () {
+            $(".scan").click(function () {
+                //once clicked scan
+                var ip = $('input[name=urls]').val();
+                var scanType = $("input[name='scan_type']:checked").val();// Get the selected scan type
+
+                if (ip) {
+                    sendScanRequest(ip, scanType);//send ip and scan type to add_scan
+                } else {
+                    $('input[name=scan_url]').val('');
+                    layer.msg('Please input a correct URL, for example: http://example.com');
+                    $(".scan").text('search');
+                    $(".scan").attr('disabled', false);
+                }
+            });
+            //$('#refresh-button').click(function () {
+            //    location.reload();  // Refresh the page when the button is clicked
+            //});
+
+            function sendScanRequest(ip, scanType) {
+                $.post('/add_scan/', {
+                    ip: ip,
+                    scan_type: scanType
+                }, function (data) {
+                    if (data.code == 200) {
+                        layer.msg('Start scanning...', {icon: 1, offset: '100px', area: ['70px', '70px']});
+                        setTimeout(function () {
+                            location.reload();  // Refresh the page after scan request
+                        }, 2000);  // Delay for 2 seconds before refreshing
+                    } else {
+                        layer.msg('Failed', {icon: 2, offset: '100px', area: ['70px', '70px']});
+                    }
+                    $(".scan").text('rescan');
+                    $('.scan').attr('disabled', false);
+                });
+            }
+        });
+    </script>
+{% endblock %}

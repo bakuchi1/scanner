@@ -1,0 +1,213 @@
+{% extends 'template.html' %}
+{% block content %}
+
+
+<div class="container">
+    <div class="row row-cards">
+            <div class="col-lg-6" >
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">
+                    Vulnerability types
+                  </h3>
+                </div>
+                <div class="card-body">
+                    <div id="piechart" style="height: 300px;"></div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                The hazard level and corresponding quantity
+              </h3>
+            </div>
+            <div class="card-body">
+                <div id="bar" style="height: 300px;"></div>
+            </div>
+          </div>
+        </div>
+        </div>
+    </div>
+    <div class="container mt-4">
+        <div class="table-responsive" id="refresh">
+            <table class="table table-bordered text-center" id="table" data-toggle="table">
+                <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Status</th>
+                    <th>Target url</th>
+                    <th>Scan type</th>
+                    <th>Vulnerabilities</th>
+                    <th>Time</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for i in data %}
+                    <tr>
+                        <td>{{ i.id }}</td>
+                        {% if i.status == 'completed' %}
+                            <td>
+                                <span class="badge bg-success">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                         class="bi bi-check" viewBox="0 0 16 16">
+                                        <path d="M11.77 3.97a1 1 0 0 1 1.416 1.415l-5 5a1 1 0 0 1-1.416 0l-2.5-2.5a1 1 0 0 1 1.416-1.416L7 8.586l4.293-4.293a1 1 0 0 1 1.477-.083z"/>
+                                    </svg>
+                                    {{ i.status }}
+                                </span>
+                            </td>
+                        {% elif i.status == 'failed' %}
+                            <td>
+                                <span class="badge bg-danger">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                         class="bi bi-x" viewBox="0 0 16 16">
+                                        <path d="M3.354 3.354a.5.5 0 0 1 .792-.106L8 7.586l3.854-3.854a.5.5 0 0 1 .708.708L8.707 8l3.853 3.854a.5.5 0 0 1-.708.708L8 8.707l-3.854 3.853a.5.5 0 0 1-.708-.708L7.293 8 3.44 4.146a.5.5 0 0 1-.086-.792z"/>
+                                    </svg>
+                                    {{ i.status }}
+                                </span>
+                            </td>
+
+                        {% else %}
+                             <td>
+                                 <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                 {{ i.status }}
+                             </td>
+                        {% endif %}
+
+                        <td>
+                            {% if i.target_id == None %}
+                                <a href="#">{{ i.target }}</a>
+                            {% else %}
+                                <a href="vuln_result/{{ i.target_id }}">{{ i.target }}</a>
+                            {% endif %}
+                        </td>
+                        <td>{{ i.scan_type }}</td>
+                        <td>
+                            <span class="badge bg-danger ">{{ i.vuln.high }}</span>
+                            <span class="badge bg-warning">{{ i.vuln.medium }}</span>
+                            <span class="badge bg-primary">{{ i.vuln.low }}</span>
+                            <span class="badge bg-success">{{ i.vuln.info }}</span>
+                        </td>
+                        <td class="text-secondary">{{ i.plan }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block js %}
+<script>
+        var chartDom_line = document.getElementById('bar');
+        var myChart_line = echarts.init(chartDom_line);
+        myChart_line.setOption({
+            tooltip: {},
+            legend: {
+
+            },
+            xAxis: {
+                type: 'value',
+                boundaryGap: [0, 0.01]
+            },
+            yAxis: {
+                type: 'category',
+                data: ['low','medium','High']
+            },
+            series: [
+                {
+
+                },
+                {
+
+                }
+            ]
+        });
+        $.post('/get_vuln_value', function (data) {
+          myChart_line.setOption({
+            series: [
+            {
+
+                type: 'bar',
+                data: data['high']
+            },
+            {
+
+                type: 'bar',
+                data: [{value: data['normal'][1], itemStyle: {color: '#3ecf8e'}},{value: data['normal'][2], itemStyle: {color: '#FFDC60'}},{value: data['normal'][0], itemStyle: {color: '#fa755a'}}],
+                markPoint: {
+                    data: [
+                        {type: 'max', name: 'max',itemStyle: {color: ['#FFDC60']},},
+                        {type: 'min', name: 'min',itemStyle: {color: ['#fa755a']},}
+                    ]
+                },
+                markLine: {
+                   data: [
+                        {type: 'average', name: 'ave',itemStyle: {color: ['#ab47bc']},}
+                    ]
+                },
+            },
+            ]
+          });
+        });
+    </script>
+    <script>
+    var chartDom = document.getElementById('piechart');
+    var myChart = echarts.init(chartDom);
+    myChart.setOption({
+        tooltip: {
+            trigger: 'item'
+        },
+        legend: {
+        orient: 'horizontal',
+        top: 'bottom',
+        padding: 0,
+        },
+        toolbox: {
+            show: true,
+            right: 50,
+            feature: {
+                dataView: {readOnly: false},
+                saveAsImage: {},
+            }
+        },
+        series: [
+            {
+                name: 'vulnerability',
+                type: 'pie',
+                radius: '70%',
+                data: [{value: 1,name:'xss'},{value: 2,name:'sql'},{value: 3,name:'csrf'},{value: 3,name:'ssrf'}],
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                }
+            }
+        ]
+    });
+    $.post('/get_vuln_rank', function (data) {
+      myChart.setOption({
+        series: [
+          {
+            name: 'vulnerability',
+            type: 'pie',
+            radius: '65%',
+            data: data,
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+              }
+            }
+          }]
+
+      });
+    });
+</script>
+{% endblock %}

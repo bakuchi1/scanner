@@ -1,0 +1,40 @@
+{% extends 'template.html' %}
+
+{% block content %}
+
+<div class="container-xl " >
+        <div class=" card-group " >
+            <div class="col-lg-12">
+              <div class="card" >
+                <div class="card-header">
+                  <h3 class="card-title text-center">
+                      <div class="text-dark">Vulnerabilities details : </div>
+                      <div class="text-muted">{{ data.affects_url }}</div>
+                  </h3>
+                </div>
+                <div class="card-body">
+                    <div class="card-title" style="font-size: 1.2em">URL:</div>
+                    <pre style="background-color: #EDF1F2;font-size: 1em" >{{ data.affects_url }}</pre>
+                    <div class="card-title" style="font-size: 1.2em">Vulnerability:</div>
+                    <pre style="background-color: #EDF1F2;font-size: 1em" >{{ data.vt_name }}</pre>
+                    <div class="card-title" style="font-size: 1.2em">Time:</div>
+                    <pre style="background-color: #EDF1F2;font-size: 1em" >{{ data.last_seen }}</pre>
+                    <div class="card-title" style="font-size: 1.2em">Parameter:</div>
+                    <pre style="background-color: #EDF1F2;font-size: 1em"> {{ data.parameter_name }}={{ data.parameter_data }}</pre>
+                    <div class="card-title" style="font-size: 1.2em">Attack details:</div>
+                    {% autoescape off %}
+                        <pre style="background-color: #EDF1F2;font-size: 1em">{{ data.details }}</pre>
+                    {% endautoescape %}
+                    <div class="card-title" style="font-size: 1.2em">Request:</div>
+                    <pre style="background-color: #EDF1F2;font-size: 1em">{{ data.request }}</pre>
+                    <div class="card-title" style="font-size: 1.2em">Recommendation:</div>
+                    <pre style="background-color: #EDF1F2;font-size: 1em">{{ data.recommendation }}</pre>
+                </div>
+              </div>
+            </div>
+
+        </div>
+
+    </div>
+
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'template.html' %}
+
+{% block content %}
+
+    <div class="container mt-4">
+        <div class="table-responsive" id="refresh">
+            <table class="table table-bordered text-center" id="table" data-toggle="table">
+                <thead class="table-dark">
+                <tr>
+                    <th data-sortable="true" data-field="status">Level</th>
+                    <th data-sortable="true" data-field="target">Scan target</th>
+                    <th data-sortable="true" data-field="vuln_name">Vulnerability type</th>
+                    <th data-sortable="true" data-field="time">Time</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in data %}
+                    <tr>
+                        {% if item.severity == 3 %}
+                            <td>
+                                <a class="btn bg-red-lt btn-block">
+                                    {{ item.severity }}
+                                </a>
+                            </td>
+                        {% elif item.severity == 2 %}
+                            <td>
+                                <a class="btn bg-pink-lt btn-block">
+                                    {{ item.severity }}
+                                </a>
+                            </td>
+                        {% elif item.severity == 1 %}
+                            <td>
+                                <a class="btn bg-azure-lt btn-block">
+                                    {{ item.severity }}
+                                </a>
+                            </td>
+                        {% else %}
+                            <td>
+                                <a class="btn ">
+                                    {{ item.severity }}
+                                </a>
+                            </td>
+                        {% endif %}
+                        <td style="text-align: left;">
+                            <a href="/vuln_detail/{{ item.vuln_id }}"> {{ item.target }}</a></td>
+                        <td><span class="text-dark">{{ item.vuln_name }}</span></td>
+                        <td><span class="text-muted">{{ item.time }}</span></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

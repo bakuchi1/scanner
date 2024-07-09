@@ -1,0 +1,97 @@
+{% extends 'template.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="container flex-fill">
+                <div class="row">
+                    <div class="col-md-7">
+                        <h2>Port scanning can reveal open ports at the target address and the corresponding services
+                            provided.</h2>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <input type="text" name="siteip" class="form-control form-control-lg"
+                           placeholder="Input IP address">
+                </div>
+                <div class="mt-2 text-center">
+                    <button class=" scan-btn btn btn-outline-dark">Start Port Scan</button>
+                </div>
+
+
+            </div>
+        </div>
+
+        <div class="container mt-4">
+        <div class="table-responsive" id="refresh">
+            <table class="table table-bordered text-center" id="table" data-toggle="table">
+                <thead class="table-dark">
+                <tr>
+                    <th>IP</th>
+                    <th>Port</th>
+                      <th>status</th>
+                    <th>Protocol</th>
+                    <th>Operate</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for port in all_ports %}
+                    <tr>
+                        <td>{{ port.ip }}</td>
+                        <td>{{ port.num }}</td>
+                        <td>{{ port.status }}</td>
+                        <td>{{ port.protocol }}</td>
+                        <td>
+                            <a href="http://127.0.0.1:8000/delete_port/?nid={{ port.id }}">
+                                <button class="bg-dark text-white">delete</button>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    </div>
+
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript">
+        const get_port_info = async (ip) => {
+            try {
+                const response = await $.post('port_scan/', {ip});
+                if (response.code !== 200) {
+                    layer.msg('Failed', {icon: 2, offset: '100px', area: ['70px', '70px']});
+                } else {
+                    layer.msg('success', {icon: 1, offset: '220px', area: ['70px', '70px']});
+                    setTimeout(function () {
+                            location.reload();  // Refresh the page after scan request
+                        }, 2000);
+                }
+
+                $(".scan-btn").html('<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><circle cx="10" cy="10" r="7"></circle><line x1="21" y1="21" x2="15" y2="15"></line></svg>' + 'rescan');
+                $('.scan-btn').attr('disabled', false);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        $(function () {
+            $(".scan-btn").click(async function () {
+                $(this).attr('disabled', true);
+                $(this).html('please wait<span class="spinner-border spinner-border-sm me-2" role="status"></span>');
+                const domain = $('input[name=siteip]').val();
+                if (domain) {
+                    await get_port_info(domain);
+                } else {
+                    $('input[name=siteip]').val('');
+                    layer.msg('please input correct IP, for example: 139.224.112.182');
+                    $(".scan-btn").html('<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><circle cx="10" cy="10" r="7"></circle><line x1="21" y1="21" x2="15" y2="15"></line></svg>\n' + 'scan port');
+                    $(".scan-btn").attr('disabled', false);
+                }
+            });
+        });
+    </script>
+
+{% endblock %}
